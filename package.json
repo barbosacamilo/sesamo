@@ -13,12 +13,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/<you>/sesamo.git"
+    "url": "git+https://github.com/barbosacamilo/sesamo.git"
   },
   "bugs": {
-    "url": "https://github.com/<you>/sesamo/issues"
+    "url": "https://github.com/barbosacamilo/sesamo/issues"
   },
-  "homepage": "https://github.com/<you>/sesamo#readme",
+  "homepage": "https://github.com/barbosacamilo/sesamo#readme",
   "scripts": {
     "test": "vitest",
     "build": "tsc -p tsconfig.json",
