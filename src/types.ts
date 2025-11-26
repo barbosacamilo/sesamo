@@ -13,6 +13,11 @@ export type Subscriber = () => void;
 export type Updater<T> = (curr: T) => T;
 
 /**
+ * Function to run when a DOM node is permanently removed from the tree.
+ */
+export type UnmountCallback = () => void;
+
+/**
  * Values that render as “nothing” in the DOM.
  *
  * `null`, `undefined` and booleans are treated as holes and skipped.
