@@ -1,6 +1,6 @@
 {
   "name": "sesamo",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "A tiny JavaScript UI library to avoid downloading 1TB of dependencies just to make a counter.",
   "author": "Camilo Barbosa <juanbedoya.barbosa@gmail.com>",
   "license": "MIT",
