@@ -1,41 +1,6 @@
 import { Ref } from "./ref.js";
+import { onUnmount } from "./cleanup.js";
 import type { Child, Hole, Props } from "./types.js";
-
-/**
- * Function to be run when the current "tree" is torn down.
- */
-type UnmountCallback = () => void;
-
-// Registered callbacks that run when `runAllCleanups` is called.
-const unmountCallbacks = new Set<UnmountCallback>();
-
-/**
- * Run and clear all registered unmount callbacks.
- * Intended to be called by the top-level renderer when it tears down the tree.
- */
-export function runAllCleanups(): void {
-  // Snapshot before running, then clear so callbacks can safely
-  // register new unmount callbacks if needed.
-  const callbacks = Array.from(unmountCallbacks);
-  unmountCallbacks.clear();
-
-  for (const fn of callbacks) {
-    try {
-      fn();
-    } catch {
-      // Ignore errors so one failing cleanup doesn't block others.
-    }
-  }
-}
-
-/**
- * Register a callback to run when `runAllCleanups` is called.
- *
- * @internal
- */
-function onUnmount(fn: UnmountCallback): void {
-  unmountCallbacks.add(fn);
-}
 
 /**
  * Treat null, undefined, and boolean as "holes" (no visible output).
@@ -113,8 +78,8 @@ function attachEventListener(
 
   el.addEventListener(type, listener);
 
-  // Ensure the listener is removed when the tree is torn down.
-  onUnmount(() => el.removeEventListener(type, listener));
+  // Ensure the listener is removed when this element is unmounted.
+  onUnmount(el, () => el.removeEventListener(type, listener));
 }
 
 /**
@@ -173,7 +138,7 @@ function appendRefChild(parent: Node, ref: Ref<any>): void {
   render();
 
   ref.subscribe(render);
-  onUnmount(() => ref.unsub(render));
+  onUnmount(textNode, () => ref.unsub(render));
 }
 
 /**
