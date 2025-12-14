@@ -22,13 +22,10 @@ yarn add sesamo
 pnpm add sesamo
 ```
 
-## Example: Counter
+## Example: Counter (no bundler needed)
 
-This example uses three files:
-
-- `index.html` – the page with a root element.
-- `counter.js` – the counter "component".
-- `index.js` – the entrypoint that mounts the component.
+If you want to use **sesamo** in a plain HTML file without Vite/Webpack/etc.,  
+you can import it directly from a CDN and use `mount()` to render your component.
 
 ### `index.html`
 
@@ -37,67 +34,98 @@ This example uses three files:
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>sesamo counter</title>
+    <title>sesamo counter (CDN)</title>
   </head>
   <body>
-    <!-- Root element where we'll render our app -->
     <div id="app"></div>
 
-    <!-- Entry point of our app as an ES module -->
-    <script type="module" src="./index.js"></script>
+    <script type="module">
+      // Import sesamo directly from a CDN – works in any browser that supports ES modules.
+      import {
+        h,
+        ref,
+        mount,
+      } from "https://unpkg.com/sesamo@latest/dist/index.js?module";
+
+      // Reactive value for the count
+      const count = ref(0);
+
+      // A simple component
+      function Counter() {
+        return h(
+          "button",
+          {
+            onclick: () => {
+              count.set((n) => n + 1);
+            },
+          },
+          "Clicked ",
+          count,
+          " times"
+        );
+      }
+
+      // Mount the component into #app
+      mount(document.getElementById("app"), Counter);
+    </script>
   </body>
 </html>
 ```
 
-### `index.js`
+## Example: Counter (import map, no bundler)
 
-```js
-// Import the Counter component from our module.
-import { Counter } from "./counter.js";
+If you’re serving your project with a simple static server (no bundler), you can use an
+**import map** to tell the browser where `"sesamo"` lives on disk.
 
-// Find the root element in the DOM.
-const root = document.getElementById("app");
+Assuming you installed `sesamo` with npm and are serving your project so that
+`/node_modules` is accessible, you can do:
 
-// Render the Counter inside #app.
-if (root) {
-  // `Counter()` returns a DOM node, so we just replace the contents of #app with it.
-  root.replaceChildren(Counter());
-}
-```
+### `index.html`
 
-### `counter.js`
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>sesamo counter (import map)</title>
 
-```js
-// Import the primitives from sesamo
-import { h, ref } from "sesamo";
+    <!-- Import map that tells the browser how to resolve "sesamo" -->
+    <script type="importmap">
+      {
+        "imports": {
+          "sesamo": "/node_modules/sesamo/dist/index.js"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div id="app"></div>
 
-// Create a reactive value for the count.
-// `ref(0)` means the initial value is 0.
-const count = ref(0);
+    <script type="module">
+      // Bare import specifier resolved via the import map above
+      import { h, ref, mount } from "sesamo";
 
-// Define a Counter "component" as a plain function.
-// It returns a DOM node created with `h()`.
-export function Counter() {
-  return h(
-    "button",
-    {
-      // When the button is clicked, increase the count by 1.
-      onclick: () => {
-        // Using the "updater" form: receives current value and returns the next.
-        count.set((current) => current + 1);
-      },
-    },
-    // Children of the button:
+      const count = ref(0);
 
-    // Plain text node
-    "Clicked ",
+      function Counter() {
+        return h(
+          "button",
+          {
+            onclick: () => {
+              count.set((n) => n + 1);
+            },
+          },
+          "Clicked ",
+          count,
+          " times"
+        );
+      }
 
-    // You can pass a ref directly as a child.
-    // sesamo will keep this part of the DOM in sync with the ref's value.
-    count,
-
-    // Another plain text node
-    " times"
-  );
-}
+      const root = document.getElementById("app");
+      if (root) {
+        mount(root, Counter);
+      }
+    </script>
+  </body>
+</html>
 ```
