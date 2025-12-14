@@ -1,6 +1,6 @@
 import { Ref } from "./ref.js";
 import { onUnmount } from "./cleanup.js";
-import type { Child, Hole, Props } from "./types.js";
+import type { ChildLike, Hole, Props } from "./types.js";
 
 /**
  * Treat null, undefined, and boolean as "holes" (no visible output).
@@ -83,40 +83,41 @@ function attachEventListener(
 }
 
 /**
- * Append a list of children to a parent node, delegating the handling
- * of each child to `appendChild`.
- *
- * @internal
- */
-function appendChildren(parent: Node, children: Child[]): void {
-  for (const child of children) {
-    appendChild(parent, child);
-  }
-}
-
-/**
- * Append a single child value to a parent node.
+ * Append a child or nested child structure to a parent node.
  *
  * - Holes (null/undefined/boolean) are ignored.
+ * - Arrays are recursively flattened.
  * - `Ref` values are bound to a text node and kept in sync.
  * - Nodes are appended directly.
  * - Everything else is stringified into a text node.
  *
  * @internal
  */
-function appendChild(parent: Node, child: Child): void {
+function appendChild(parent: Node, child: ChildLike): void {
+  // Hole
   if (isHole(child)) return;
 
+  // Array (recursively append each element)
+  if (Array.isArray(child)) {
+    for (const c of child) {
+      appendChild(parent, c);
+    }
+    return;
+  }
+
+  // Ref
   if (child instanceof Ref) {
     appendRefChild(parent, child);
     return;
   }
 
+  // Node
   if (child instanceof Node) {
     parent.appendChild(child);
     return;
   }
 
+  // PrimitiveChild -> string | number
   parent.appendChild(document.createTextNode(String(child)));
 }
 
@@ -142,13 +143,13 @@ function appendRefChild(parent: Node, ref: Ref<any>): void {
 }
 
 /**
- * Create a DOM element with props and children, similar to JSX/React.createElement.
+ * Create a DOM element with props and children.
  *
  * @typeParam K - Tag name of the element to create (e.g. `"div"`, `"button"`).
  * @param tag - The HTML tag to create.
  * @param props - Attributes, properties, and event handlers to apply to the element.
- * @param children - Child nodes or values to append to the element.
- * @returns The created HTMLElement.
+ * @param children - Child values (including nested arrays and `Ref`s) to append to the element.
+ * @returns The created HTML element instance.
  *
  * @example
  * const button = h("button", { onclick: () => alert("hi") }, "Click me");
@@ -156,11 +157,15 @@ function appendRefChild(parent: Node, ref: Ref<any>): void {
  */
 export function h<K extends keyof HTMLElementTagNameMap>(
   tag: K,
-  props: Props<K> | null,
-  ...children: Child[]
+  props?: Props<K> | null,
+  ...children: ChildLike[]
 ): HTMLElementTagNameMap[K] {
   const el = document.createElement(tag);
   setProps(el, props);
-  appendChildren(el, children);
+
+  for (const child of children) {
+    appendChild(el, child);
+  }
+
   return el;
 }

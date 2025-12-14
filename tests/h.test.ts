@@ -67,4 +67,36 @@ describe("h()", () => {
     expect(div.style.color).toBe("red");
     expect(div.style.backgroundColor).toBe("blue");
   });
+
+  it("accepts arrays as children", () => {
+    const list = h("li", null, [1, 2, 3, 4]);
+    expect(list.childNodes.length).toBe(4);
+    expect(list.textContent).toBe("1234");
+  });
+
+  it("accepts nested arrays of children", () => {
+    const div = h("div", null, ["a", ["b", "c"], [["d"]]]);
+    expect(div.childNodes.length).toBe(4);
+    expect(div.textContent).toBe("abcd");
+  });
+
+  it("skips holes inside arrays", () => {
+    const div = h("div", null, ["a", null, undefined, true, false, "b"]);
+
+    expect(div.childNodes.length).toBe(2);
+    expect(div.textContent).toBe("ab");
+  });
+
+  it("handles mixed child types inside arrays", () => {
+    const ref = new Ref(1);
+    const span = document.createElement("span");
+    span.textContent = "X";
+
+    const div = h("div", null, ["start-", ref, "-mid-", span, "-end"]);
+
+    expect(div.textContent).toBe("start-1-mid-X-end");
+
+    ref.set(2);
+    expect(div.textContent).toBe("start-2-mid-X-end");
+  });
 });

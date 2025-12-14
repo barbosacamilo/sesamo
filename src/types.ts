@@ -30,14 +30,14 @@ export type Hole = null | undefined | boolean;
 export type PrimitiveChild = string | number;
 
 /**
- * Any value that can be passed as a child into `h` / append helpers.
- *
- * - `PrimitiveChild` → text node
- * - `Ref` → bound to a text node and kept in sync
- * - `Hole` → ignored
- * - `Node` → appended directly
+ * Any value that can be passed as a child into `h`.
  */
-export type Child = PrimitiveChild | Ref<any> | Hole | Node;
+export type Child = PrimitiveChild | Ref<any> | Node | Hole;
+
+/**
+ * Any child value or nested arrays of children that `h` can accept.
+ */
+export type ChildLike = Child | readonly ChildLike[];
 
 /**
  * A UI component: a function that returns a DOM node.
@@ -53,12 +53,10 @@ type NativeElementProps<K extends keyof HTMLElementTagNameMap> = Omit<
 >;
 
 /**
- * Props for an intrinsic HTML element (`"div"`, `"button"`, etc.).
+ * Props for an HTML element (`"div"`, `"button"`, etc.).
  *
  * Based on the native element props, but with a friendlier `style` type
- * that accepts both:
- *   - a raw CSS string, or
- *   - a partial style object.
+ * that accepts a raw CSS string or a partial style object.
  */
 export type Props<K extends keyof HTMLElementTagNameMap> =
   NativeElementProps<K> & {
