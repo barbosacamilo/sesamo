@@ -93,7 +93,7 @@ function attachEventListener(
  *
  * @internal
  */
-function appendChild(parent: Node, child: ChildLike): void {
+export function appendChild(parent: Node, child: ChildLike): void {
   // Hole
   if (isHole(child)) return;
 
