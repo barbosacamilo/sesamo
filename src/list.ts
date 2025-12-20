@@ -4,18 +4,18 @@ import { onUnmount } from "./cleanup.js";
 import { appendChild, h } from "./h.js";
 
 /**
- * Creates an element that renders a list derived from a reactive `Ref`.
+ * Create a container element that renders the contents of a reactive list.
  *
- * The list is fully re-rendered on every change notification from `items`.
- * This favors correctness and simplicity over diffing.
+ * This implementation fully re-renders all children whenever `items` changes.
+ * It favors simplicity and correctness over keyed diffing and DOM state preservation.
  *
- * @typeParam K - HTML tag name of the parent element.
- * @typeParam T - Item type contained in the list.
+ * @typeParam K - HTML tag name of the container element.
+ * @typeParam T - Item type contained in `items`.
  *
- * @param tag - The HTML tag to create for the list container.
- * @param props - Attributes/properties/event handlers to apply to the container.
- * @param items - Reactive container holding the current list of items.
- * @param renderFn - Maps an item + index to its rendered child content.
+ * @param tag - HTML tag for the container.
+ * @param props - Properties/attributes/event handlers applied to the container.
+ * @param items - Reactive list of items.
+ * @param renderFn - Maps an item and its index to child content.
  * @returns The created container element.
  *
  * @example
@@ -25,8 +25,6 @@ import { appendChild, h } from "./h.js";
  * const el = list("ul", { className: "menu" }, items, (text) =>
  *   h("li", null, text)
  * );
- *
- * // Later: items.set(["x", "y", "z"]) -> re-renders <li> children.
  * ```
  */
 export function list<K extends keyof HTMLElementTagNameMap, T>(
@@ -38,21 +36,20 @@ export function list<K extends keyof HTMLElementTagNameMap, T>(
   const parent = h(tag, props);
 
   const clearChildren = (): void => {
-    // Use a simple loop for broad DOM compatibility and predictable semantics.
     while (parent.firstChild) parent.removeChild(parent.firstChild);
   };
 
   const render = (): void => {
     clearChildren();
 
-    const current = items.get();
-    if (current.length === 0) return;
+    const listItems = items.get();
+    if (listItems.length === 0) return;
 
-    // Batch DOM writes to avoid repeated layout/paint work on large lists.
+    // Batch DOM writes to avoid repeatedly appending to the live container in a loop.
     const frag = document.createDocumentFragment();
 
     let index = 0;
-    for (const item of current) {
+    for (const item of listItems) {
       appendChild(frag, renderFn(item, index++));
     }
 
@@ -61,8 +58,8 @@ export function list<K extends keyof HTMLElementTagNameMap, T>(
 
   render();
 
-  items.subscribe(render);
-  onUnmount(parent, () => items.unsub(render)); // Assumption A/B
+  const unsub = items.subscribe(render);
+  onUnmount(parent, unsub);
 
   return parent;
 }
