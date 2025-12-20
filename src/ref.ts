@@ -1,12 +1,5 @@
 import type { Subscriber, Updater } from "./types.js";
 
-/**
- * Minimal reactive value container.
- *
- * Holds a value of type `T` and lets subscribers react when it changes.
- *
- * @typeParam T - Type of the wrapped value.
- */
 export class Ref<T> {
   private value: T;
   private readonly subs: Set<Subscriber> = new Set();
@@ -17,6 +10,8 @@ export class Ref<T> {
 
   /**
    * Get the current value.
+   *
+   * @returns The current value stored in this `Ref`.
    */
   get(): T {
     return this.value;
@@ -25,34 +20,28 @@ export class Ref<T> {
   /**
    * Set the value.
    *
-   * Accepts either:
-   * - a direct value, or
-   * - an updater function that derives the next value from the current one.
-   *
-   * Notifies subscribers only if the value actually changes
-   * (using `Object.is` for comparison).
+   * @param next - The next value or an updater function.
+   * @returns The current value after the update (or the previous value if unchanged).
    */
   set(next: T | Updater<T>): T {
-    const previous = this.value;
+    const prev = this.value;
 
     const nextValue =
-      typeof next === "function" ? (next as Updater<T>)(previous) : next;
+      typeof next === "function" ? (next as Updater<T>)(prev) : next;
 
-    // No change, no notifications.
-    if (Object.is(previous, nextValue)) {
-      return previous;
+    if (Object.is(prev, nextValue)) {
+      return prev;
     }
 
     this.value = nextValue;
 
-    // Snapshot subscribers in case the set is mutated during notifications.
     const listeners = Array.from(this.subs);
 
     for (const fn of listeners) {
       try {
         fn();
-      } catch {
-        // Ignore subscriber errors so other listeners still run.
+      } catch (err) {
+        // Catch errors thrown by subscribers so other listeners still run.
       }
     }
 
@@ -62,14 +51,18 @@ export class Ref<T> {
   /**
    * Subscribe to value changes.
    *
-   * The subscriber is called whenever `set` changes the value.
+   * @param fn - The function to run when the value changes.
+   * @returns The function to remove the subscription.
    */
-  subscribe(fn: Subscriber): void {
+  subscribe(fn: Subscriber): () => void {
     this.subs.add(fn);
+    return () => this.subs.delete(fn);
   }
 
   /**
    * Unsubscribe a previously registered subscriber.
+   *
+   * @param fn - The same function reference previously passed to `subscribe`.
    */
   unsub(fn: Subscriber): void {
     this.subs.delete(fn);
@@ -77,7 +70,11 @@ export class Ref<T> {
 }
 
 /**
- * Helper to create a `Ref` with type inference.
+ * Helper to create a `Ref`.
+ *
+ * @typeParam T - Type of `initialValue`.
+ * @param initialValue - Initial value of the `Ref`.
+ * @returns A `Ref` instance.
  */
 export function ref<T>(initialValue: T): Ref<T> {
   return new Ref(initialValue);
