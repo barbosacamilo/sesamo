@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { Ref } from "../src/ref";
+import { Ref } from "../src/public/ref";
 
 describe("Ref", () => {
   it("set() updates the value and returns the new value", () => {

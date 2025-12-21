@@ -1,4 +1,5 @@
-import type { Subscriber, Updater } from "./types.js";
+type Subscriber = () => void;
+type Updater<T> = (curr: T) => T;
 
 export class Ref<T> {
   private value: T;

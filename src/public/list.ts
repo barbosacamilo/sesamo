@@ -1,7 +1,9 @@
+import { h } from "./h.js";
 import { Ref } from "./ref.js";
 import type { ChildLike, Props } from "./types.js";
-import { onUnmount } from "./cleanup.js";
-import { appendChild, h } from "./h.js";
+
+import { onUnmount } from "../internal/cleanup.js";
+import { appendChild } from "../internal/dom.js";
 
 /**
  * Create a container element that renders the contents of a reactive list.

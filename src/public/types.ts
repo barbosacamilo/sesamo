@@ -1,23 +1,6 @@
 import type { Ref } from "./ref.js";
 
 /**
- * Function called when a reactive value changes.
- */
-export type Subscriber = () => void;
-
-/**
- * Functional updater used by `Ref.set`.
- *
- * Receives the current value and must return the next one.
- */
-export type Updater<T> = (curr: T) => T;
-
-/**
- * Function to run when a DOM node is permanently removed from the tree.
- */
-export type UnmountCallback = () => void;
-
-/**
  * Values that render as “nothing” in the DOM.
  *
  * `null`, `undefined` and booleans are treated as holes and skipped.
@@ -40,7 +23,7 @@ export type Child = PrimitiveChild | Ref<any> | Node | Hole;
 export type ChildLike = Child | readonly ChildLike[];
 
 /**
- * A UI component: a function that returns a DOM node.
+ * A UI component. A function that returns a DOM node.
  */
 export type Component = () => Node;
 
