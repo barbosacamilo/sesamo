@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, beforeEach } from "vitest";
-import { createRouter, navigate, Link } from "../src/router";
+import { createRouter, navigate, Link } from "../src/public/router";
 import type { Component } from "../src/types.js";
 
 describe("router", () => {

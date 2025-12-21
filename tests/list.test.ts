@@ -3,10 +3,10 @@
  */
 
 import { describe, expect, it, vi } from "vitest";
-import { list } from "../src/list";
-import { h } from "../src/h";
-import { ref } from "../src/ref";
-import { mount } from "../src/mount";
+import { list } from "../src/public/list";
+import { h } from "../src/public/h";
+import { ref } from "../src/public/ref";
+import { mount } from "../src/public/mount";
 
 async function flushMutations(): Promise<void> {
   // In jsdom, MutationObserver callbacks are scheduled as microtasks.

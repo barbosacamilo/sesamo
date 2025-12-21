@@ -3,8 +3,8 @@
  */
 
 import { describe, it, expect, vi } from "vitest";
-import { h } from "../src/h";
-import { Ref } from "../src/ref";
+import { h } from "../src/public/h";
+import { Ref } from "../src/public/ref";
 
 describe("h()", () => {
   it("creates an element with the correct tag", () => {
