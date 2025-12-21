@@ -1,4 +1,4 @@
-export { ref } from "./public/ref.js";
+export { ref, Ref } from "./public/ref.js";
 export { h } from "./public/h.js";
 export { navigate, Link } from "./public/router.js";
 export { mount } from "./public/mount.js";
